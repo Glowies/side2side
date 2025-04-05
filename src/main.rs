@@ -49,9 +49,9 @@ fn main() {
     let img = image::open(&image_file).expect("Failed to open image");
 
     // label stats
-    let label_size: u32 = 32;
-    let x_margin: u32 = 10;
-    let y_margin: u32 = 4;
+    let label_size: u32 = (img.height() / 20) as u32;
+    let x_margin: u32 = label_size / 5;
+    let y_margin: u32 = label_size / 5;
     let y_position: u32 = (img.height() / 20) as u32;
 
     // initialize scale and font of the label text
