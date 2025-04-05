@@ -1,5 +1,5 @@
 use getopts::Options;
-use std::env;
+use std::{env, path::Path};
 use imageproc::image;
 use imageproc::drawing;
 use imageproc::point::Point;
@@ -16,6 +16,12 @@ fn main() {
 
     // declare possible command line arguments
     let mut opts = Options::new();
+    opts.optopt(
+        "o", 
+        "output-dir", 
+        "directory to save the annotated image in", 
+        "DIR"
+    );
     opts.optopt(
         "c", 
         "color", 
@@ -39,14 +45,18 @@ fn main() {
     }
 
     // get the image file and label text from the command line arguments
-    let image_file = matches.free[0].clone();
+    let image_path = matches.free[0].clone();
     let label_text = matches.free[1].clone();
 
-    // get the color option if provided
+    // extract image file name
+    let image_file_name = get_image_file_name(&image_path);
+
+    // get optional arguments
     let _color = matches.opt_str("c").unwrap_or_else(|| String::from("#FFFFFF"));
+    let output_dir = matches.opt_str("o").unwrap_or_else(|| String::from("./annotated"));
 
     // load image with imageproc
-    let img = image::open(&image_file).expect("Failed to open image");
+    let img = image::open(&image_path).expect("Failed to open image");
 
     // label stats
     let label_size: u32 = (img.height() / 20) as u32;
@@ -91,5 +101,36 @@ fn main() {
     );
 
     // save the image with the label text
-    output_img.save("output.png").expect("Failed to save image");
+    save_image(&output_img, &image_file_name, &output_dir);
+}
+
+fn get_image_file_name(image_path: &str) -> String {
+    let image_file = Path::new(&image_path);
+    let image_os_str = match image_file.file_name() {
+        Some(name) => name,
+        None => {
+            panic!("Failed to get file name from path: {}", image_path)
+        }
+    };
+    let image_file_name = match image_os_str.to_str() {
+        Some(name) => name,
+        None => {
+            panic!("Failed to convert file name to string: {}", image_path)
+        }
+    };
+
+    String::from(image_file_name)
+}
+
+fn save_image(
+    image: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, 
+    filename: &str,
+    output_dir: &str
+) {
+    let output_path = Path::new(output_dir);
+    if !output_path.exists() {
+        std::fs::create_dir_all(output_path).expect("Failed to create output directory");
+    }
+    let output_file = output_path.join(filename);
+    image.save(output_file).expect("Failed to save image");
 }
