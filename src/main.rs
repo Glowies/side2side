@@ -57,6 +57,7 @@ fn main() {
 
     // load image with imageproc
     let img = image::open(&image_path).expect("Failed to open image");
+    let mut img_canvas = img.to_rgba8();
 
     // label stats
     let label_size: u32 = (img.height() / 20) as u32;
@@ -83,15 +84,15 @@ fn main() {
         Point::new(rect.left(), rect.bottom()),
     ];
 
-    let output_img = drawing::draw_polygon(
-        &img,
+    drawing::draw_polygon_mut(
+        &mut img_canvas,
         &points,
-        image::Rgba([235, 143, 200, 255]),
+        image::Rgba([235, 134, 200, 255]),
     );
 
     // write text on image
-    let output_img = drawing::draw_text(
-        &output_img,
+    drawing::draw_text_mut(
+        &mut img_canvas,
         image::Rgba([255, 255, 255, 255]),
         x_margin as i32,
         y_position as i32,
@@ -101,7 +102,7 @@ fn main() {
     );
 
     // save the image with the label text
-    save_image(&output_img, &image_file_name, &output_dir);
+    save_image(&img_canvas, &image_file_name, &output_dir);
 }
 
 fn get_image_file_name(image_path: &str) -> String {
