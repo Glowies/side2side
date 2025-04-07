@@ -86,7 +86,7 @@ fn main() {
     let output_img = drawing::draw_polygon(
         &img,
         &points,
-        image::Rgba([241, 162, 130, 255]),
+        image::Rgba([235, 143, 200, 255]),
     );
 
     // write text on image
